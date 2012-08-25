@@ -1,3 +1,5 @@
+// package session provides simple http.Cookie based session management with database/sql storage
+package session
 // to install:
 // 		$ go get github.com/jackdoe/session
 // to test:
@@ -5,7 +7,6 @@
 // doc:
 //		$ godoc github.com/jackdoe/session
 //		http://go.pkgdoc.org/github.com/jackdoe/session
-package session
 import (
 	"fmt"
 	"time"
@@ -25,13 +26,35 @@ var (
 	CookieDomain string = "localhost"
 	CookiePath string = "/"
 	db *sql.DB
-	table string = "session"
+	table string
 )
 type SessionObject struct {
 	Id string // unique idenfifier with CookieValueLen len
 	Data map[string]interface{} // actual data
 	Stamp int64 // last-upate time stamp
 }
+
+
+// session.Init() with sql.DB and table name, 
+// returns error if it is unable to create the session table
+// 
+// example:
+// 		db, _ := sql.Open("sqlite3", "./foo.db")
+//		// or
+//		db, _ := sql.Open("mysql", "user:pass@tcp(192.168.0.1:3306)/app")
+//		err = session.Init(db,"session")
+
+func Init(_db *sql.DB,_table string) (error){
+	db = _db
+	table = _table
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s` (id varchar(%d) UNIQUE, data blob, stamp bigint)",table,CookieValueLen + 1)
+	_,err := db.Exec(query); if err != nil {
+		fmt.Printf("failed to create table %s: %s",table, err.Error())
+	}
+	return err
+}
+
+
 /*
 example:
 
@@ -88,6 +111,7 @@ func find_or_create(id string) (*SessionObject) {
 	}
 	return this
 }
+
 // session.Expire() returns the number of expired sessions
 func Expire() (int64) {
 	query := fmt.Sprintf("DELETE FROM `%s` WHERE stamp < %d",table,time.Now().Unix() - int64(CookieExpireInSeconds))
@@ -96,14 +120,6 @@ func Expire() (int64) {
 		return 0
 	}
 	return rows
-}
-func Init(_db *sql.DB,_table string) (error){
-	db = _db
-	table = _table
-	_,err := db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s` (id varchar(%d) UNIQUE, data blob, stamp bigint)",table,CookieValueLen + 1)); if err != nil {
-		fmt.Printf("%s",err.Error())
-	}
-	return err
 }
 
 // the key must be a string
@@ -130,8 +146,6 @@ func (this *SessionObject) Get(k string) (interface {},bool) {
 	return v,ok
 }
 
-// Copyright 2012 The Gorilla Authors. All rights reserved.
-// serialize encodes a value using gob.
 func (this *SessionObject) store() {
 	this.Stamp = time.Now().Unix()
 	b,err := serialize(this.Data);
@@ -147,6 +161,8 @@ func (this *SessionObject) err(err error) {
 	fmt.Printf("error: %s: %s\n",this.Id,err.Error())
 }
 
+// Copyright 2012 The Gorilla Authors. All rights reserved.
+// serialize encodes a value using gob.
 func serialize(src interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	enc := gob.NewEncoder(buf)
