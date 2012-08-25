@@ -2,6 +2,8 @@
 // 		go get github.com/jackdoe/session
 // to test:
 // 		go test github.com/jackdoe/session # uses sqlite3 from github.com/mattn/go-sqlite3
+// doc:
+//		godoc github.com/jackdoe/session
 package session
 import (
 	"fmt"
