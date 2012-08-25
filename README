@@ -68,9 +68,6 @@ func New(w http.ResponseWriter, r *http.Request) (s *SessionObject)
     new session object with that cookie value using NewWithId(ident) finally
     it stores that id in http.ResponseWriter
 
-func NewWithId(id string) *SessionObject
-    find_or_create by ID (requested id must be of len CookieValueLen)
-
 func (this *SessionObject) Get(k string) (interface{}, bool)
     returns value of type interface{} and true/false for key existance
 
@@ -91,4 +88,8 @@ func (this *SessionObject) Set(k string, v interface{}) *SessionObject
 
 	s.Set("list_of_numbers",[]int{1,2,3,4})
 
+
+SUBDIRECTORIES
+
+	example
 
