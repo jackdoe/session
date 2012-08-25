@@ -5,7 +5,7 @@ to install:
 pretty doc:
         http://go.pkgdoc.org/github.com/jackdoe/session
 
-$ godoc github.com/jackdoe/session > README
+$ godoc -tabwidth=1 github.com/jackdoe/session > README
 -------------------------------------------
 PACKAGE
 
@@ -18,13 +18,13 @@ package session
 VARIABLES
 
 var (
-    CookieKey             string = "go.session"
-    CookieValueLen        int    = 254
-    CookieExpireInSeconds int    = 60
-    CookieSecure          bool   = false
-    CookieHttpOnly        bool   = false
-    CookieDomain          string = "localhost"
-    CookiePath            string = "/"
+ CookieKey             string = "go.session"
+ CookieValueLen        int    = 254
+ CookieExpireInSeconds int    = 60
+ CookieSecure          bool   = false
+ CookieHttpOnly        bool   = false
+ CookieDomain          string = "localhost"
+ CookiePath            string = "/"
 )
 
 
@@ -48,9 +48,9 @@ func Init(_db *sql.DB, _table string) error
 TYPES
 
 type SessionObject struct {
-    Id    string                 // unique idenfifier with CookieValueLen len
-    Data  map[string]interface{} // actual data
-    Stamp int64                  // last-upate time stamp
+ Id    string                 // unique idenfifier with CookieValueLen len
+ Data  map[string]interface{} // actual data
+ Stamp int64                  // last-upate time stamp
 }
 
 func New(w http.ResponseWriter, r *http.Request) (s *SessionObject)
