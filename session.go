@@ -60,7 +60,7 @@ func New(w http.ResponseWriter, r *http.Request) (s *SessionObject) {
 	cookie,_ := r.Cookie(CookieKey)
 	var ident string
 	if cookie != nil { ident = cookie.Value }
-	s = NewWithId(ident)
+	s = find_or_create(ident)
 	t := time.Now().Add(time.Duration(CookieExpireInSeconds) * time.Second)
 	cookie = &http.Cookie {	CookieKey,s.Id,CookiePath,CookieDomain,t,t.String(),CookieExpireInSeconds,CookieSecure,CookieHttpOnly,s.Id,make([]string,0)}
 	http.SetCookie(w,cookie)
@@ -68,7 +68,7 @@ func New(w http.ResponseWriter, r *http.Request) (s *SessionObject) {
 }
 
 // find_or_create by ID (requested id must be of len CookieValueLen)
-func NewWithId(id string) (*SessionObject) {
+func find_or_create(id string) (*SessionObject) {
 	this := &SessionObject{id,make(map[string]interface{}),time.Now().Unix()}
 	if len(this.Id) != CookieValueLen {
 	    b := make([]byte, CookieValueLen * 2) 

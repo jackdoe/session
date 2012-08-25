@@ -49,7 +49,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("Failed to insert record:", err)
 		return
 	}
-	s := NewWithId("x") 
+	s := find_or_create("x") 
 	if (s.Id == "x") {
 		t.Errorf("id must not be 'x'")
 	}
@@ -78,13 +78,13 @@ func TestNew(t *testing.T) {
 		}
 	}
 	c(s,true)
-	c(NewWithId(s.Id),false); created_sessions++
-	b := NewWithId("x"); created_sessions++
+	c(find_or_create(s.Id),false); created_sessions++
+	b := find_or_create("x"); created_sessions++
 	if (b.Id == s.Id) {
 		t.Errorf("generated ID must not be the same as the old one")
 	}
 	for i:= 0; i< 10 ;i++ {
-		_ = NewWithId("x")
+		_ = find_or_create("x")
 		created_sessions++
 	}
 	CookieExpireInSeconds = 0
