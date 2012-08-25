@@ -1,11 +1,14 @@
+// to install:
+// 		go get github.com/jackdoe/session
+// to test:
+// 		go test github.com/jackdoe/session # uses sqlite3 from github.com/mattn/go-sqlite3
 package session
 import (
-	"log"
 	"fmt"
 	"time"
 	"encoding/gob"
-	"bytes"
 	"encoding/base64"
+	"bytes"
 	"crypto/rand"
 	"database/sql"	
 	"net/http"
@@ -95,7 +98,7 @@ func Init(_db *sql.DB,_table string) (error){
 	db = _db
 	table = _table
 	_,err := db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s` (id varchar(%d) UNIQUE, data blob, stamp bigint)",table,CookieValueLen + 1)); if err != nil {
-		log.Printf("%s",err.Error())
+		fmt.Printf("%s",err.Error())
 	}
 	return err
 }
@@ -138,7 +141,7 @@ func (this *SessionObject) store() {
 }
 
 func (this *SessionObject) err(err error) {
-	log.Printf("%s: %s",this.Id,err.Error())
+	fmt.Printf("error: %s: %s\n",this.Id,err.Error())
 }
 
 func serialize(src interface{}) ([]byte, error) {
