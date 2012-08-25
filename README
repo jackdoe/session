@@ -1,0 +1,94 @@
+PACKAGE
+
+package session
+    import "github.com/jackdoe/session"
+
+    to install:
+
+	$ go get github.com/jackdoe/session
+
+    to test:
+
+	$ go test github.com/jackdoe/session # uses sqlite3 from github.com/mattn/go-sqlite3
+
+    doc:
+
+	$ godoc github.com/jackdoe/session
+
+VARIABLES
+
+var (
+    CookieKey             string = "go.session"
+    CookieValueLen        int    = 254
+    CookieExpireInSeconds int    = 60
+    CookieSecure          bool   = false
+    CookieHttpOnly        bool   = false
+    CookieDomain          string = "localhost"
+    CookiePath            string = "/"
+)
+
+
+FUNCTIONS
+
+func Expire() int64
+    session.Expire() returns the number of expired sessions
+
+func Init(_db *sql.DB, _table string) error
+
+
+TYPES
+
+type SessionObject struct {
+    Id    string                 // unique idenfifier with CookieValueLen len
+    Data  map[string]interface{} // actual data
+    Stamp int64                  // last-upate time stamp
+}
+
+func New(w http.ResponseWriter, r *http.Request) (s *SessionObject)
+    example:
+
+	db, _ := sql.Open("sqlite3", "./foo.db")
+	defer db.Close()
+	session.Init(db,"session")
+	session.CookieKey = "go.is.awesome"
+	session.CookieDomain = "localhost"
+	http.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
+		s := session.New(w,r)
+		s.Set("list_of_numbers",[]int{1,2,3,4})
+		fmt.Fprintf(w,"stored key list_of_numbers in session: %s",s.Id)
+	})
+	http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
+		s := session.New(w,r)
+		x,_ := s.Get("list_of_numbers")
+		fmt.Fprintf(w,"extracted: %#v for key: list_of_numbers in session: %s",x,s.Id)
+	})
+	http.ListenAndServe("localhost:8080", nil)
+
+    extracts cookie value from http.Request.Cookie(CookieKey) then creates
+    new session object with that cookie value using NewWithId(ident) finally
+    it stores that id in http.ResponseWriter
+
+func NewWithId(id string) *SessionObject
+    find_or_create by ID (requested id must be of len CookieValueLen)
+
+func (this *SessionObject) Get(k string) (interface{}, bool)
+    returns value of type interface{} and true/false for key existance
+
+func (this *SessionObject) Has(k string) bool
+    returns true/false if key exists in the session or not
+
+func (this *SessionObject) Set(k string, v interface{}) *SessionObject
+    the key must be a string uses encoding.gob, so you might have to do
+    gob.Register on some types for example:
+
+	gob.Register(map[interface{}]string{})
+
+    now you can set:
+
+	s.Set("x",map[interface{}]string{5:"x","w":"x2",5.0:"five"})
+
+    example:
+
+	s.Set("list_of_numbers",[]int{1,2,3,4})
+
+
