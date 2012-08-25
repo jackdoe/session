@@ -1,12 +1,5 @@
 // package session provides simple http.Cookie based session management with database/sql storage
 package session
-// to install:
-// 		$ go get github.com/jackdoe/session
-// to test:
-// 		$ go test github.com/jackdoe/session # uses sqlite3 from github.com/mattn/go-sqlite3
-// doc:
-//		$ godoc github.com/jackdoe/session
-//		http://go.pkgdoc.org/github.com/jackdoe/session
 import (
 	"fmt"
 	"time"
@@ -43,7 +36,6 @@ type SessionObject struct {
 //		// or
 //		db, _ := sql.Open("mysql", "user:pass@tcp(192.168.0.1:3306)/app")
 //		err = session.Init(db,"session")
-
 func Init(_db *sql.DB,_table string) (error){
 	db = _db
 	table = _table
@@ -54,32 +46,27 @@ func Init(_db *sql.DB,_table string) (error){
 	return err
 }
 
+// extracts cookie value from http.Request.Cookie(CookieKey)
+// then creates new session object with that cookie value using NewWithId(ident)
+// finally it stores that id in http.ResponseWriter
+// example:
+// 	db, _ := sql.Open("sqlite3", "./foo.db")
+// 	defer db.Close()
+// 	session.Init(db,"session")
+// 	session.CookieKey = "go.is.awesome"
+// 	session.CookieDomain = "localhost"
 
-/*
-example:
-
-	db, _ := sql.Open("sqlite3", "./foo.db")
-	defer db.Close()
-	session.Init(db,"session")
-	session.CookieKey = "go.is.awesome"
-	session.CookieDomain = "localhost"
-
-	http.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
-		s := session.New(w,r)
-		s.Set("list_of_numbers",[]int{1,2,3,4})
-		fmt.Fprintf(w,"stored key list_of_numbers in session: %s",s.Id)
-	})
-	http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
-		s := session.New(w,r)
-		x,_ := s.Get("list_of_numbers")
-		fmt.Fprintf(w,"extracted: %#v for key: list_of_numbers in session: %s",x,s.Id)
-	})
-	http.ListenAndServe("localhost:8080", nil)
-
-extracts cookie value from http.Request.Cookie(CookieKey)
-then creates new session object with that cookie value using NewWithId(ident)
-finally it stores that id in http.ResponseWriter
-*/
+// 	http.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
+// 		s := session.New(w,r)
+// 		s.Set("list_of_numbers",[]int{1,2,3,4})
+// 		fmt.Fprintf(w,"stored key list_of_numbers in session: %s",s.Id)
+// 	})
+// 	http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
+// 		s := session.New(w,r)
+// 		x,_ := s.Get("list_of_numbers")
+// 		fmt.Fprintf(w,"extracted: %#v for key: list_of_numbers in session: %s",x,s.Id)
+// 	})
+// 	http.ListenAndServe("localhost:8080", nil)
 func New(w http.ResponseWriter, r *http.Request) (s *SessionObject) {
 	cookie,_ := r.Cookie(CookieKey)
 	var ident string
