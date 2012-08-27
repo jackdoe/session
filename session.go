@@ -106,7 +106,6 @@ func find_or_create(id string) *SessionObject {
 	}
 	return this
 }
-
 // session.Expire() returns the number of expired sessions
 func Expire() int64 {
 	query := fmt.Sprintf("DELETE FROM `%s` WHERE stamp < %d", table, time.Now().Unix()-int64(CookieExpireInSeconds))
@@ -119,6 +118,7 @@ func Expire() int64 {
 }
 
 // the key must be a string
+// if the value is nil - then the key is removed
 // uses encoding.gob, so you might have to do gob.Register on some types
 // for example:
 // 		gob.Register(map[interface{}]string{})
@@ -126,8 +126,13 @@ func Expire() int64 {
 // 		s.Set("x",map[interface{}]string{5:"x","w":"x2",5.0:"five"})
 // example: 
 // 		s.Set("list_of_numbers",[]int{1,2,3,4})
+
 func (this *SessionObject) Set(k string, v interface{}) *SessionObject {
-	this.Data[k] = v
+	if v == nil {
+		delete(this.Data,k)
+	} else {
+		this.Data[k] = v
+	}
 	this.store()
 	return this
 }
@@ -179,3 +184,4 @@ func deserialize(src []byte, dst interface{}) error {
 	}
 	return nil
 }
+
